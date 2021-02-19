@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct HealthWidgetApp: App {
+	let healthPermissionsManager = HealthKitManager()
     var body: some Scene {
         WindowGroup {
             ContentView()
+				.environmentObject(healthPermissionsManager)
         }
     }
 }
