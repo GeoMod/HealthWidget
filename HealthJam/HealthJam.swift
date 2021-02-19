@@ -8,18 +8,6 @@
 import WidgetKit
 import SwiftUI
 
-enum SFSymbolImage: String, View {
-	case activeHeartrate = "bolt.heart.fill"
-	case calories = "bolt.horizontal.fill"
-	case distance = "chevron.right.circle.fill"
-	case restingHeartRate = "heart.fill"
-	case stepcount = "figure.walk.circle.fill"
-
-	var body: some View {
-		Image(systemName: rawValue)
-	}
-}
-
 
 struct HealthJamEntryView : View {
 	var entry: Provider.Entry
@@ -30,58 +18,79 @@ struct HealthJamEntryView : View {
 			VStack(alignment: .leading) {
 				Text(entry.date, style: .date)
 					.font(Font.title2.bold())
-					.padding(.leading)
-
+					.padding(.bottom)
 				HStack(alignment: .top) {
 					Image(systemName: "waveform.path.ecg")
 						.font(.largeTitle)
 						.foregroundColor(.red)
 						.padding([.leading, .trailing])
-					Spacer()
-					HeatlthMetricsView()
+					HeatlthMetricsView(entry: entry)
 						.font(Font.body.monospacedDigit())
-						.padding()
 				}
 			}
 			.foregroundColor(.white)
 		}
 	}
-
 }
 
 
 struct HeatlthMetricsView: View {
+	var entry: Provider.Entry
+
 	var body: some View {
-		VStack(alignment: .leading, spacing: 2) {
-			Label {
-				Text("Resting Heart Rate")
-			} icon: {
-				SFSymbolImage.restingHeartRate
-					.foregroundColor(.purple)
+		HStack(spacing: 10) {
+			VStack(alignment: .leading, spacing: 5) {
+				Label {
+					VStack(alignment: .leading) {
+						Text("\(entry.restingHeartRate)")
+						Text("Resting HR")
+							.modifier(FootnoteModifer())
+					}
+				} icon: {
+					SFSymbolImage.restingHeartRate
+						.foregroundColor(.purple)
+				}
+
+				Label {
+					VStack(alignment: .leading) {
+						Text("\(entry.stepCount)")
+						Text("Step Count")
+							.modifier(FootnoteModifer())
+					}
+				} icon: {
+					SFSymbolImage.stepcount
+						.foregroundColor(.blue)
+				}
 			}
 
-			Label {
-				Text("Step Count")
-			} icon: {
-				SFSymbolImage.stepcount
-					.foregroundColor(.blue)
-			}
+			VStack(alignment: .leading, spacing: 5) {
+				Label {
+					VStack(alignment: .leading) {
+						Text("\(entry.activeHeartRate)")
+						Text("Active HR")
+							.modifier(FootnoteModifer())
+					}
+				} icon: {
+					SFSymbolImage.activeHeartrate
+						.foregroundColor(.red)
+				}
 
-			Label {
-				Text("Active Heart Rate")
-			} icon: {
-				SFSymbolImage.activeHeartrate
-					.foregroundColor(.red)
+				Label {
+					VStack(alignment: .leading) {
+						Text("\(entry.distance, specifier: "%.2f")")
+						Text("Distance")
+							.modifier(FootnoteModifer())
+					}
+				} icon: {
+					SFSymbolImage.distance
+						.foregroundColor(.green)
+				}
 			}
-
-			Label {
-				Text("Run/Walk Distance")
-			} icon: {
-				SFSymbolImage.distance
-					.foregroundColor(.green)
-			}
-		}
+		}.padding(.bottom)
 	}
+
+
+
 }
 
 
@@ -102,7 +111,7 @@ struct HealthJam: Widget {
 
 struct HealthJam_Previews: PreviewProvider {
     static var previews: some View {
-		HealthJamEntryView(entry: SimpleEntry(date: Date(), heart: Image(systemName: "heart.fill")))
+		HealthJamEntryView(entry: SimpleEntry(date: Date(), restingHeartRate: 55, stepCount: 2000, activeHeartRate: 104, distance: 3.3))
             .previewContext(WidgetPreviewContext(family: .systemMedium))
     }
 }

@@ -24,6 +24,7 @@
 		18E6DDE325E0108000D328B6 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E134A425DFFEB600529150 /* HealthKitManager.swift */; };
 		18E6DDE825E0108E00D328B6 /* HealthKitPermissionsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E134A925E0018F00529150 /* HealthKitPermissionsHandler.swift */; };
 		18E6DDEE25E01BFE00D328B6 /* WidgetTimelineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E6DDED25E01BFE00D328B6 /* WidgetTimelineProvider.swift */; };
+		18E6DDF825E0545300D328B6 /* ImageModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E6DDF725E0545300D328B6 /* ImageModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +89,7 @@
 		18E6DDD425E0078100D328B6 /* HealthWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthWidget.entitlements; sourceTree = "<group>"; };
 		18E6DDD525E0078100D328B6 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		18E6DDED25E01BFE00D328B6 /* WidgetTimelineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTimelineProvider.swift; sourceTree = "<group>"; };
+		18E6DDF725E0545300D328B6 /* ImageModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +206,7 @@
 			children = (
 				18E134BF25E0034600529150 /* HealthJam.swift */,
 				18E6DDED25E01BFE00D328B6 /* WidgetTimelineProvider.swift */,
+				18E6DDF725E0545300D328B6 /* ImageModels.swift */,
 				18E134C125E0034700529150 /* Assets.xcassets */,
 				18E134C325E0034700529150 /* Info.plist */,
 			);
@@ -401,6 +404,7 @@
 				18E6DDEE25E01BFE00D328B6 /* WidgetTimelineProvider.swift in Sources */,
 				18E134C025E0034600529150 /* HealthJam.swift in Sources */,
 				18E6DDE825E0108E00D328B6 /* HealthKitPermissionsHandler.swift in Sources */,
+				18E6DDF825E0545300D328B6 /* ImageModels.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
