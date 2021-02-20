@@ -86,7 +86,7 @@ struct HeatlthMetricsView: View {
 						.foregroundColor(.green)
 				}
 			}
-		}.padding(.bottom)
+		}
 	}
 
 
