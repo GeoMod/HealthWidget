@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WidgetKit
 
 struct ContentView: View {
 	@EnvironmentObject var healthManager: HealthKitManager
@@ -29,13 +30,20 @@ struct ContentView: View {
 						.clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 10)))
 						.shadow(color: .gray, radius: 2, x: 5.0, y: 5.0)
 				})
+
 				Spacer()
 			}
 			.navigationTitle("#SwiftUIJam")
-			.navigationBarItems(trailing: Image("jam")
-									.resizable()
-									.scaledToFit()
-									.frame(width: 50, height: 50)
+			.navigationBarItems(trailing: Button(action: {
+				WidgetCenter.shared.reloadAllTimelines()
+			}, label: {
+				Image("jam")
+					.resizable()
+					.scaledToFit()
+					.frame(width: 50, height: 50)
+					.shadow(radius: 10)
+			})
+
 			)
 		}
     }

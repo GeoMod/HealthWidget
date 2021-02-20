@@ -39,7 +39,7 @@ struct Provider: TimelineProvider {
 
 		for hourOffset in 0 ..< 2 {
 			let entryDate = Calendar.current.date(byAdding: .hour, value: -hourOffset, to: currentDate)!
-			let entry = SimpleEntry(date: entryDate, restingHeartRate: 55, stepCount: manager.stepCount, activeHeartRate: manager.activeHeartRate, distance: 3.3)
+			let entry = SimpleEntry(date: entryDate, restingHeartRate: manager.restingHeartRate, stepCount: manager.stepCount, activeHeartRate: manager.activeHeartRate, distance: manager.distance)
 			entries.append(entry)
 		}
 
