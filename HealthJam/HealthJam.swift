@@ -67,7 +67,7 @@ struct HeatlthMetricsView: View {
 				Label {
 					VStack(alignment: .leading) {
 						Text("\(entry.activeHeartRate)")
-						Text("Active HR")
+						Text("Max HR")
 							.modifier(FootnoteModifer())
 					}
 				} icon: {
@@ -98,8 +98,10 @@ struct HeatlthMetricsView: View {
 struct HealthJam: Widget {
     let kind: String = "HealthJam"
 
+	let manager = HealthKitManager()
+
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+		StaticConfiguration(kind: kind, provider: Provider(manager: manager)) { entry in
             HealthJamEntryView(entry: entry)
         }
         .configurationDisplayName("HealthJam")

@@ -19,10 +19,11 @@ class HealthKitManager: NSObject, ObservableObject  {
 	@Published var distance = 0.0
 
 	let healthStore = HKHealthStore()
+	let currentDate = Date()
 
 	public func setUpHealthKitPermissions() {
 		let authorizationStatus = healthStore.authorizationStatus(for: HKQuantityType.workoutType())
-
+		let typesToShare: Set = [HKQuantityType.workoutType()]
 
 		let typesToRead: Set = [
 			HKQuantityType.quantityType(forIdentifier: .heartRate)!,
@@ -37,7 +38,7 @@ class HealthKitManager: NSObject, ObservableObject  {
 			return
 		}
 
-		healthStore.requestAuthorization(toShare: nil, read: typesToRead) { success, error in
+		healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead) { success, error in
 			if success {
 				// pull health data
 			} else if error != nil {
@@ -46,99 +47,134 @@ class HealthKitManager: NSObject, ObservableObject  {
 		}
 	}
 
-	public func updateHealthData() {
+	public func updateValues() {
 		fetchRestingHeartRate()
 		fetchStepCount()
-		fetchActiveHeartRate()
+		fetchMaxHeartRate()
 		fetchDistance()
 	}
 
+	private func fetchMaxHeartRate() {
+		let interval = NSDateComponents()
+		interval.day = 1
 
-	private func fetchRestingHeartRate() {
-		guard let quantityType = HKQuantityType.quantityType(forIdentifier: .restingHeartRate) else {
-			fatalError("Unable to retrive step count")
+		guard let quantityType = HKQuantityType.quantityType(forIdentifier: .heartRate) else {
+			fatalError("Unable to retrive heart rate")
 		}
 
-		let query = HKSampleQuery(sampleType: quantityType, predicate: nil, limit: 1, sortDescriptors: nil) { (query, results, error) in
-			if let result = results as? [HKQuantitySample] {
-				let value = result.last
-				guard let restingHeartRate = value?.quantity.doubleValue(for: HKUnit.count().unitDivided(by: HKUnit.minute())) else {
-					fatalError("No resting heart rate. You're dead!")
+		let query = HKStatisticsCollectionQuery(quantityType: quantityType, quantitySamplePredicate: nil, options: .discreteMax, anchorDate: currentDate, intervalComponents: interval as DateComponents)
+
+		query.initialResultsHandler = { query, results, error in
+			guard let statsCollection = results else {
+				fatalError("error occurred fetcing resting heart rate")
+			}
+
+			let beginningOfDay = self.calendar.dateInterval(of: .day, for: self.currentDate)!.start
+			statsCollection.enumerateStatistics(from: beginningOfDay, to: self.currentDate) { statistics, unsafePointer in
+				if let quantity = statistics.maximumQuantity() {
+					let value = quantity.doubleValue(for: HKUnit.count().unitDivided(by: HKUnit.minute()))
+					print("heart RATE is \(value)")
+					self.activeHeartRate = Int(value)
 				}
-				self.restingHeartRate = Int(restingHeartRate)
 			}
 		}
-
 		healthStore.execute(query)
 	}
 
-	public func fetchStepCount() {
-//		let interval = NSDateComponents()
-//		interval.day = 1
+	private func fetchRestingHeartRate() {
+		let interval = NSDateComponents()
+		interval.day = 1
+
+		guard let quantityType = HKQuantityType.quantityType(forIdentifier: .restingHeartRate) else {
+			fatalError("Unable to retrive resting heart rate")
+		}
+
+		let query = HKStatisticsCollectionQuery(quantityType: quantityType, quantitySamplePredicate: nil, options: .mostRecent, anchorDate: currentDate, intervalComponents: interval as DateComponents)
+
+		query.initialResultsHandler = { query, results, error in
+			guard let statsCollection = results else {
+				fatalError("error occurred fetcing resting heart rate")
+			}
+
+			let beginningOfDay = self.calendar.dateInterval(of: .day, for: self.currentDate)!.start
+			statsCollection.enumerateStatistics(from: beginningOfDay, to: self.currentDate) { statistics, unsafePointer in
+				if let quantity = statistics.mostRecentQuantity() {
+					let value = quantity.doubleValue(for: HKUnit.count().unitDivided(by: HKUnit.minute()))
+					self.restingHeartRate = Int(value)
+				}
+			}
+		}
+		healthStore.execute(query)
+	}
+
+	private func fetchStepCount() {
+		let interval = NSDateComponents()
+		interval.day = 1
 
 		guard let quantityType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
 			fatalError("Unable to retrive step count")
 		}
 
-		// This could be the simpler way...maybe
-		let query = HKSampleQuery(sampleType: quantityType, predicate: nil, limit: 1, sortDescriptors: nil) { [unowned self] (query, results, error) in
-			if let result = results as? [HKQuantitySample] {
+		let query = HKStatisticsCollectionQuery(quantityType: quantityType, quantitySamplePredicate: nil, options: .cumulativeSum, anchorDate: currentDate, intervalComponents: interval as DateComponents)
 
-				let value = result.last
-				guard let numberOfSteps = value?.quantity.doubleValue(for: HKUnit.count()) else { return }
-				self.stepCount = Int(numberOfSteps)
+		query.initialResultsHandler = { query, results, error in
+			guard let statsCollection = results else {
+				// Perform proper error handling here
+				self.showAlertView()
+				fatalError("*** An error occurred while calculating the statistics: \(error?.localizedDescription ?? "Defualt Error") ***")
 			}
-		}
 
+			guard let beginningOfDay = self.calendar.dateInterval(of: .day, for: self.currentDate)?.start else {
+				fatalError("Unable to calculate start date")
+			}
 
-//		let query = HKStatisticsCollectionQuery(quantityType: quantityType, quantitySamplePredicate: nil, options: .cumulativeSum, anchorDate: Date(), intervalComponents: interval as DateComponents)
-
-//		query.initialResultsHandler = { query, results, error in
-//			guard let statsCollection = results else {
-//				// Perform proper error handling here
-//				fatalError("*** An error occurred while calculating the statistics: \(error?.localizedDescription ?? "Defualt Error") ***")
-//			}
-//
-//			guard let startDate = self.calendar.date(byAdding: .day, value: -1, to: Date()) else {
-//				fatalError("Unable to calculate the start date")
-//			}
-//
-//			// Plot the step count
-//			statsCollection.enumerateStatistics(from: startDate, to: Date()) { [unowned self] statistics, stop in
-//
-//				if let quantity = statistics.sumQuantity() {
-////					let date = statistics.startDate
-//					let value = quantity.doubleValue(for: HKUnit.count())
-//
-//					// Call a custom method to plot each data point.
-////					self.plotWeeklyStepCount(value, forDate: date)
-//					stepCount = Int(value)
-//				}
-//			}
-//		}
-		healthStore.execute(query)
-	}
-
-	private func fetchActiveHeartRate() {
-		guard let quantityType = HKQuantityType.quantityType(forIdentifier: .heartRate) else {
-			fatalError("Unable to retrive step count")
-		}
-
-		let query = HKSampleQuery(sampleType: quantityType, predicate: nil, limit: 1, sortDescriptors: nil) { (query, results, error) in
-			if let result = results as? [HKQuantitySample] {
-				let value = result.last
-				guard let activeHeartRate = value?.quantity.doubleValue(for: HKUnit.count().unitDivided(by: HKUnit.minute())) else {
-					fatalError("No heart rate. You're dead!")
+			// Plot the step count
+			statsCollection.enumerateStatistics(from: beginningOfDay, to: self.currentDate) { statistics, stop in
+				if let quantity = statistics.sumQuantity() {
+					let value = quantity.doubleValue(for: HKUnit.count())
+					// Set the step count
+					self.stepCount = Int(value)
 				}
-				self.activeHeartRate = Int(activeHeartRate)
 			}
 		}
 		healthStore.execute(query)
 	}
 
 	private func fetchDistance() {
-		//
+		var pastWorkouts = [HKWorkout]()
+		let authorizationStatus = healthStore.authorizationStatus(for: HKWorkoutType.workoutType())
+
+		if authorizationStatus != .sharingAuthorized {
+			// If the user hasn't authorized HealthKit nothing will happen
+			// Consider diplatying a button prompting the user to authorize
+			print("App is not authorized")
+			return
+		}
+
+		let appPredicate = HKQuery.predicateForWorkouts(with: .running)
+		let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
+
+		let query = HKSampleQuery(sampleType: .workoutType(), predicate: appPredicate,
+								  limit: 2, sortDescriptors: [sortDescriptor]) { query, results, error in
+			if let queryError = error {
+				print("There was an error \(queryError.localizedDescription)")
+			}
+
+			pastWorkouts = results as! [HKWorkout]
+			guard pastWorkouts.count != 0 else {
+				print("Got nothing")
+				return
+			}
+			self.distance = pastWorkouts[0].totalDistance?.doubleValue(for: HKUnit.mile()) ?? 99.9
+//			formatLabel(value: (pastWorkouts[workoutIncrement].totalDistance?.doubleValue(for: HKUnit.mile()))!)
+
+			print("Past workouts are \(pastWorkouts.count) quantitiy")
+			print("Most recent workout is \(results![0])")
+		}
+		healthStore.execute(query)
 	}
+
+
 
 
 

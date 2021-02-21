@@ -17,8 +17,11 @@ struct SimpleEntry: TimelineEntry {
 }
 
 struct Provider: TimelineProvider {
+	let calendar = Calendar.current
 
-	let manager = HealthKitManager()
+//	let manager = HealthKitManager()
+
+	@ObservedObject var manager: HealthKitManager
 
 	func placeholder(in context: Context) -> SimpleEntry {
 		SimpleEntry(date: Date(), restingHeartRate: 55, stepCount: 2000, activeHeartRate: 134, distance: 3.3)
@@ -31,25 +34,18 @@ struct Provider: TimelineProvider {
 
 	func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> ()) {
 		var entries: [SimpleEntry] = []
+		print("updating")
 
-		// Generate a timeline consisting of 1 entry an hour in the past, starting from the current date.
-		let currentDate = Date()
+		manager.updateValues()
 
-		fetchHealthData()
-
-		for hourOffset in 0 ..< 2 {
-			let entryDate = Calendar.current.date(byAdding: .hour, value: -hourOffset, to: currentDate)!
+		#warning("First fetch returns 0's for everything, then the next one updates to proper values in the timeline/widget")
+		for _ in 0 ..< 2 {
+			let entryDate = Calendar.current.date(byAdding: .second, value: -30, to: Date())!
 			let entry = SimpleEntry(date: entryDate, restingHeartRate: manager.restingHeartRate, stepCount: manager.stepCount, activeHeartRate: manager.activeHeartRate, distance: manager.distance)
 			entries.append(entry)
 		}
-
 		let timeline = Timeline(entries: entries, policy: .atEnd)
 		completion(timeline)
-	}
-
-
-	private func fetchHealthData() {
-		manager.updateHealthData()
 	}
 
 
