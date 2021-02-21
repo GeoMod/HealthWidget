@@ -162,7 +162,7 @@ class HealthKitManager: NSObject, ObservableObject  {
 
 			pastWorkouts = results as! [HKWorkout]
 			guard pastWorkouts.count != 0 else {
-				print("Got nothing")
+				print("No workouts shown")
 				return
 			}
 			self.distance = pastWorkouts[0].totalDistance?.doubleValue(for: HKUnit.mile()) ?? 99.9

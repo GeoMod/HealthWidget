@@ -38,15 +38,22 @@ struct Provider: TimelineProvider {
 
 		manager.updateValues()
 
-		#warning("First fetch returns 0's for everything, then the next one updates to proper values in the timeline/widget")
-		for _ in 0 ..< 2 {
-			let entryDate = Calendar.current.date(byAdding: .second, value: -30, to: Date())!
-			let entry = SimpleEntry(date: entryDate, restingHeartRate: manager.restingHeartRate, stepCount: manager.stepCount, activeHeartRate: manager.activeHeartRate, distance: manager.distance)
-			entries.append(entry)
-		}
-		let timeline = Timeline(entries: entries, policy: .atEnd)
+//		for offset in 0 ..< 3 {
+//			let entryDate = calendar.date(byAdding: .minute, value: offset, to: Date())!
+//			let entry = SimpleEntry(date: entryDate, restingHeartRate: manager.restingHeartRate, stepCount: manager.stepCount, activeHeartRate: manager.activeHeartRate, distance: manager.distance)
+//			entries.append(entry)
+//		}
+
+		let refreshDate = calendar.date(byAdding: .minute, value: 30, to: Date())!
+		let entry = SimpleEntry(date: Date(), restingHeartRate: manager.restingHeartRate, stepCount: manager.stepCount, activeHeartRate: manager.activeHeartRate, distance: manager.distance)
+		entries.append(entry)
+
+//		let timeline = Timeline(entries: entries, policy: .atEnd)
+		let timeline = Timeline(entries: entries, policy: .after(refreshDate))
 		completion(timeline)
 	}
+
+
 
 
 }
